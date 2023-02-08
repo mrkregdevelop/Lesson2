@@ -1,5 +1,5 @@
 from flask import Flask, request
-from utils import generate_password
+from utils import generate_password, execute_sql
 
 app = Flask(__name__)
 
@@ -26,9 +26,60 @@ def password():
     return generate_password(length)
 
 
+@app.route("/emails/create")
+def email_create():
+    email_value = request.args['email_value']
+    name = request.args['name']
+
+    sql = f'''
+    INSERT INTO Emails (EmailValue, Name)
+    VALUES ('{email_value}', '{name}');
+    '''
+    execute_sql(sql)
+    return ''
+
+
+@app.route("/emails/read")
+def email_read():
+    import sqlite3
+    con = sqlite3.connect("tutorial.db")
+    cur = con.cursor()
+
+    sql = '''
+        SELECT * FROM Emails;
+        '''
+    res = cur.execute(sql)
+    emails = res.fetchall()
+    con.close()
+    return emails
+
+
+@app.route("/emails/update")
+def email_update():
+    email_id = request.args['email_id']
+    name = request.args['name']
+    sql = f'''
+    UPDATE Emails
+    SET name = '{name}'
+    WHERE EmailID = {email_id};
+    '''
+    execute_sql(sql)
+    return ''
+
+
+@app.route("/emails/delete")
+def email_delete():
+    email_id = request.args['email_id']
+    sql = f'''
+    DELETE FROM Emails
+    WHERE EmailID = {email_id};
+    '''
+    execute_sql(sql)
+    return ''
+
+
 if __name__ == '__main__':
     app.run(debug=True)
-
 
 
 '''
@@ -56,5 +107,12 @@ https://127.0.0.1:5000/hello/dsjhds?length=10
 127.0.0.1 localhost
 
 GET, POST, PUT, PATCH, DELETE, HEAD, OPTIONS
+
+CRUD
+
+C - Create
+R - Read
+U - Update
+D - Delete
 
 '''
